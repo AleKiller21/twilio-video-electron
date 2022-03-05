@@ -1,0 +1,14 @@
+.local-participant-preview {
+  display: flex;
+  flex-direction: column;
+}
+
+.local-participant-preview #local-media {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.local-participant-preview .card {
+  margin-right: 15px;
+  border: none;
+}

@@ -63,7 +63,7 @@ async function getScreenTrack() {
 // Attach the Track to the DOM.
 function attachTrack(track, container, participantName) {
 
-  let cardSize = "12rem";
+  let cardSize = "50rem";
 
   if (track.disable === undefined) { // only on local tracks
     cardSize = "36rem";
@@ -73,8 +73,6 @@ function attachTrack(track, container, participantName) {
     container.append(track.attach());
   } else {
     const card = $('<div class="card" style="width:' + cardSize + ';"/>');
-    const cardTitle = $('<h5 class="card-title">' + participantName + '</h5>');
-    cardTitle.appendTo(card);
     const embed = $('<div />').addClass("embed-responsive embed-responsive-16by9");
     embed.appendTo(card);
     card.appendTo(container);
