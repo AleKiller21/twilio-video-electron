@@ -40,10 +40,10 @@ async function getScreenTrack() {
           mandatory: {
             chromeMediaSource: 'desktop',
             chromeMediaSourceId: sourceId,
-            minWidth: 1280,
-            maxWidth: 1280,
-            minHeight: 720,
-            maxHeight: 720
+            minWidth: 1920,
+            maxWidth: 1920,
+            minHeight: 1080,
+            maxHeight: 1080
           }
         }
       })
@@ -159,10 +159,16 @@ async function connectAsync(data) {
   log("Joining room '" + roomName + "'...");
   var connectOptions = {
     name: roomName,
-    logLevel: 'debug'
+    logLevel: 'debug',
+    networkQuality: {
+      local: 1
+    }
   };
 
-  const localTracksPromise = Video.createLocalTracks();
+  const localTracksPromise = Video.createLocalTracks({
+    audio: true,
+    video: { height: { exact: 1080 }, frameRate: 30, width: { exact: 1920 } },
+  });
 
   localTracksPromise.then(function (tracks) {
     if (!connectOptions.tracks) {
@@ -170,9 +176,8 @@ async function connectAsync(data) {
     } else {
       connectOptions.tracks.push(tracks)
     }
-  }, function (error) {
-    error('Unable to access local media', error);
-  });
+  })
+    .catch(err => console.log('Unable to access local media', err));
 
   if ($('#screen-share-checkbox').is(":checked") == true) {
     const screenTrack = await getScreenTrack();
@@ -189,9 +194,7 @@ async function connectAsync(data) {
 
   // Join the Room with the token from the server and the
   // LocalParticipant's Tracks.
-  Video.connect(data.token, connectOptions).then(roomJoined, function (error) {
-    log('Could not connect to Twilio: ' + error.message);
-  });
+  Video.connect(data.token, connectOptions).then(roomJoined).catch(err => log('Could not connect to Twilio: ' + err.message));
 }
 
 // When we are about to transition away from this page, disconnect
@@ -234,6 +237,7 @@ function getTracks(participant) {
 // Successfully connected!
 function roomJoined(room) {
   window.room = activeRoom = room;
+  const { localParticipant } = room;
 
   log("Joined as '" + identity + "'");
   document.getElementById('button-join').style.display = 'none';
@@ -265,6 +269,11 @@ function roomJoined(room) {
     log("RemoteParticipant '" + participant.identity + "' left the room");
     detachParticipantTracks(participant);
   });
+
+  log(`Initial network quality level: ${localParticipant.networkQualityLevel
+    }`);
+  localParticipant.on('networkQualityLevelChanged', (networkQualityLevel) => log(`Network Quality Level: ${networkQualityLevel
+    }`));
 
   // Once the LocalParticipant leaves the room, detach the Tracks
   // of all Participants, including that of the LocalParticipant.

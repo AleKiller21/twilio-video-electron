@@ -14,7 +14,7 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
     }
   })
 
@@ -57,7 +57,7 @@ ipcMain.handle('get-screen-source', async () => {
   for (const source of sources) {
     console.log('Found screen source: ' + source.name);
 
-    if (source.name === 'Screen 2') {
+    if (source.name === 'Screen 1') {
       return source.id;
     }
   }
