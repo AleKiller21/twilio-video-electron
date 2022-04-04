@@ -8,7 +8,7 @@
     "run-node-server": "node server",
     "build-web": "cd web && browserify src/video-demo.js > public/video-demo.js",
     "clean-web": "cd web && rimraf public/video-demo.js",
-    "start": "npm run run-electron"
+    "start": "npm run clean-web && npm run build-web && npm run run-electron"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [

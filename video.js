@@ -70,12 +70,12 @@ function attachTrack(track, container, participantName) {
   }
 
   if (track.kind === 'audio') {
-    container.append(track.attach());
+    container?.append(track.attach());
   } else {
     const card = $('<div class="card" style="width:' + cardSize + ';"/>');
     const embed = $('<div />').addClass("embed-responsive embed-responsive-16by9");
     embed.appendTo(card);
-    card.appendTo(container);
+    container && card.appendTo(container);
 
     if (!track.sid) {
       embed.attr('trackid', track.id);
@@ -112,13 +112,13 @@ function detachTrack(track) {
 }
 
 // A new RemoteTrack was published to the Room.
-function trackPublished(publication, container, participantName) {
+function remoteTrackPublished(publication, participantName) {
   if (publication.isSubscribed) {
-    attachTrack(publication.track, container, participantName);
+    attachTrack(publication.track, undefined, participantName);
   }
   publication.on('subscribed', function (track) {
     log('Subscribed to ' + publication.kind + ' track');
-    attachTrack(track, container, participantName);
+    attachTrack(track, undefined, participantName);
   });
   publication.on('unsubscribed', detachTrack);
 }
@@ -129,12 +129,12 @@ function trackUnpublished(publication) {
 }
 
 // A new RemoteParticipant joined the Room
-function participantConnected(participant, container) {
+function remoteParticipantConnected(participant) {
   participant.tracks.forEach(function (publication) {
-    trackPublished(publication, container, participant.identity);
+    remoteTrackPublished(publication, participant.identity);
   });
-  participant.on('trackPublished', function (publication) {
-    trackPublished(publication, container, participant.identity);
+  participant.on('remoteTrackPublished', function (publication) {
+    remoteTrackPublished(publication, participant.identity);
   });
   participant.on('trackUnpublished', trackUnpublished);
 }
@@ -252,16 +252,16 @@ function roomJoined(room) {
   }
 
   // Attach the Tracks of the Room's Participants.
-  var remoteMediaContainer = document.getElementById('remote-media');
+  // var remoteMediaContainer = document.getElementById('remote-media');
   room.participants.forEach(function (participant) {
     log("Already in Room: '" + participant.identity + "'");
-    participantConnected(participant, remoteMediaContainer);
+    remoteParticipantConnected(participant);
   });
 
   // When a Participant joins the Room, log the event.
   room.on('participantConnected', function (participant) {
     log("Joining: '" + participant.identity + "'");
-    participantConnected(participant, remoteMediaContainer);
+    remoteParticipantConnected(participant);
   });
 
   // When a Participant leaves the Room, detach its Tracks.
